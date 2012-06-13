@@ -42,9 +42,13 @@ def index():
 
 @app.route('/report', methods=['POST'])
 def report():
+    print 'before before'
     cur = before_request()
+    print 'after before'
     cur.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
+    print 'before teardown'
     teardown_request(cur)
+    print 'after teardown'
 
     return json.dumps({'status':'ok'})
 
