@@ -23,7 +23,12 @@ def get_conn():
 if __name__ == '__main__':
     conn = get_conn()
     cur = conn.cursor()
-    if sys.argv[1] == 'dump':
+    if sys.argv[1] == 'create':
+        cur.execute("SELECT * from pg_catalog.pg_tables "
+                "WHERE tablename = 'reports'")
+        if not cur.fetchall():
+            cur.execute('CREATE TABLE reports (json text)')
+    elif sys.argv[1] == 'dump':
         cur.execute('SELECT * FROM reports')
         res = cur.fetchall()
         for r in res:

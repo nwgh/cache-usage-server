@@ -16,21 +16,6 @@ def before_request():
     conn = db.get_conn()
     print 'before get cursor'
     cur = conn.cursor()
-    print 'before create/replace function'
-    cur.execute('''
-            CREATE OR REPLACE FUNCTION ensure_table() RETURNS void AS
-            $_$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT * FROM pg_catalog.pg_tables
-                        WHERE tablename = 'reports'
-                ) THEN
-                    CREATE TABLE reports (json text);
-                END IF;
-            END;
-            $_$ LANGUAGE plpgsql;''')
-    print 'before ensure table'
-    cur.execute('SELECT ensure_table()')
     print 'before return'
 
     return cur
