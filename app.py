@@ -1,37 +1,18 @@
 import json
 import os
-import psycopg2
 
-from dj_database_url import config as get_db_config
 from flask import Flask, request, g
 
-# Parse the database configuration into something psycopg2 can handle
-raw_dbconfig = get_db_config(default='postgres://hurley@localhost/cacheusage')
-dbconfig = {}
-if raw_dbconfig['NAME']:
-    dbconfig['database'] = raw_dbconfig['NAME']
-if raw_dbconfig['USER']:
-    dbconfig['user'] = raw_dbconfig['USER']
-if raw_dbconfig['PASSWORD']:
-    dbconfig['password'] = raw_dbconfig['PASSWORD']
-if raw_dbconfig['HOST']:
-    dbconfig['host'] = raw_dbconfig['HOST']
-if raw_dbconfig['PORT']:
-    dbconfig['port'] = raw_dbconfig['port']
+import db
 
 app = Flask(__name__)
-
-import logging
-app.logger.setLevel(logging.DEBUG)
-app.logger.addHandler(logging.FileHandler('/Users/hurley/heroku.txt'))
 
 @app.before_request
 def before_request():
     """Set up the database connection so we have it available in the request
     """
-    app.logger.debug('cfg = %s' % (str(dbconfig),))
     # First, make sure we have the table we need
-    conn = psycopg2.connect(**dbconfig)
+    conn = db.get_conn()
     cur = conn.cursor()
     cur.execute('''
             CREATE OR REPLACE FUNCTION ensure_table() RETURNS void AS
@@ -64,18 +45,9 @@ def index():
 
 @app.route('/report', methods=['POST'])
 def report():
-    rval = {'status':'fail'}
-    for k, v in request.form.iteritems():
-        try:
-            info = json.loads(k)
-        except:
-            continue
+    g.db.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
 
-        g.db.execute('INSERT INTO reports (json) VALUES (%s)', (k,))
-        rval['status'] = 'ok'
-        break
-
-    return json.dumps(rval)
+    return json.dumps({'status':'ok'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
