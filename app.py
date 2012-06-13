@@ -43,29 +43,6 @@ def report():
 
     return json.dumps({'status':'ok'})
 
-@app.route('/dump')
-def dump():
-    cur = before_request()
-    cur.execute('SELECT * FROM reports')
-    res = cur.fetchall()
-    teardown_request(cur)
-
-    return '\n'.join(r[0] for r in res)
-
-@app.route('/clean', methods=['GET', 'POST'])
-def clean():
-    if request.method != 'POST':
-        return 'ok'
-
-    if request.data != 'nwhsaysok':
-        return 'ok'
-
-    cur = before_request()
-    cur.execute('DELETE FROM reports')
-    teardown_request(cur)
-
-    return 'ok'
-
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
