@@ -11,8 +11,12 @@ def before_request():
     """Set up the database connection so we have it available in the request
     """
     # First, make sure we have the table we need
+    print 'before get conn'
+    print 'dbconfig = %s' % str(db.dbconfig)
     conn = db.get_conn()
+    print 'before get cursor'
     cur = conn.cursor()
+    print 'before create/replace function'
     cur.execute('''
             CREATE OR REPLACE FUNCTION ensure_table() RETURNS void AS
             $_$
@@ -25,7 +29,9 @@ def before_request():
                 END IF;
             END;
             $_$ LANGUAGE plpgsql;''')
+    print 'before ensure table'
     cur.execute('SELECT ensure_table()')
+    print 'before return'
 
     return cur
 
