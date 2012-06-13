@@ -7,7 +7,6 @@ import db
 
 app = Flask(__name__)
 
-@app.before_request
 def before_request():
     """Set up the database connection so we have it available in the request
     """
@@ -28,16 +27,14 @@ def before_request():
             $_$ LANGUAGE plpgsql;''')
     cur.execute('SELECT ensure_table()')
 
-    g.db = cur
+    return cur
 
-@app.teardown_request
-def teardown_request(arg):
+def teardown_request(cur):
     """Commit our changes and close the database connection to not waste
     resources
     """
-    g.db.connection.commit()
-    g.db.connection.close()
-    g.db = None
+    cur.connection.commit()
+    cur.connection.close()
 
 @app.route('/')
 def index():
@@ -45,7 +42,9 @@ def index():
 
 @app.route('/report', methods=['POST'])
 def report():
-    g.db.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
+    cur = before_request()
+    cur.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
+    teardown_request(cur)
 
     return json.dumps({'status':'ok'})
 
