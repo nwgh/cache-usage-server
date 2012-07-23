@@ -11,12 +11,8 @@ def before_request():
     """Set up the database connection so we have it available in the request
     """
     # First, make sure we have the table we need
-    print 'before get conn'
-    print 'dbconfig = %s' % str(db.dbconfig)
     conn = db.get_conn()
-    print 'before get cursor'
     cur = conn.cursor()
-    print 'before return'
 
     return cur
 
@@ -33,13 +29,9 @@ def index():
 
 @app.route('/report', methods=['POST'])
 def report():
-    print 'before before'
     cur = before_request()
-    print 'after before'
     cur.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
-    print 'before teardown'
     teardown_request(cur)
-    print 'after teardown'
 
     return json.dumps({'status':'ok'})
 
