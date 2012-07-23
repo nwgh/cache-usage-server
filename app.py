@@ -29,9 +29,9 @@ def index():
 
 @app.route('/report', methods=['POST'])
 def report():
-    cur = before_request()
-    cur.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
-    teardown_request(cur)
+    #cur = before_request()
+    #cur.execute('INSERT INTO reports (json) VALUES (%s)', (request.data,))
+    #teardown_request(cur)
 
     return json.dumps({'status':'ok'})
 
